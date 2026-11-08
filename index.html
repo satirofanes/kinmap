@@ -65,6 +65,23 @@ aside{background:var(--panel);border:1px solid var(--line);border-radius:12px;bo
 .tabs button{flex:1;border:0;border-radius:0;border-bottom:2px solid transparent;background:transparent;padding:10px}
 .tabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent);font-weight:700}
 #panelBody{padding:6px 14px 18px}
+.swatches{display:grid;grid-template-columns:repeat(9,1fr);gap:5px}
+.sw{aspect-ratio:1;min-width:0;padding:0;border:1px solid rgba(0,0,0,.25);border-radius:6px}
+.sw[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:2px}
+.sw.none{background-image:linear-gradient(135deg,transparent 46%,#c2410c 46% 54%,transparent 54%);background-color:#fff}
+.hexrow{display:grid;grid-template-columns:46px 1fr;gap:8px;margin-top:8px}
+.hexrow input[type=color]{width:46px;height:34px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
+.pats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pats button{height:36px;padding:4px}
+.pats button[aria-pressed=true]{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:0}
+.pv{display:block;width:100%;height:100%;border:1px solid #1d2733;border-radius:3px;background-color:#fff}
+.pv.diag1{background-image:repeating-linear-gradient(135deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
+.pv.diag2{background-image:repeating-linear-gradient(45deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
+.pv.horiz{background-image:repeating-linear-gradient(0deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
+.pv.vert{background-image:repeating-linear-gradient(90deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
+.pv.grid{background-image:repeating-linear-gradient(0deg,#1d2733 0 1.5px,transparent 1.5px 6px),repeating-linear-gradient(90deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
+.pv.cross{background-image:repeating-linear-gradient(135deg,#1d2733 0 1.5px,transparent 1.5px 6px),repeating-linear-gradient(45deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
+.pv.dots{background-image:radial-gradient(circle,#1d2733 1.3px,transparent 1.7px);background-size:6px 6px}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .seg button{flex:1;border:0;border-radius:0;background:transparent}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
@@ -144,6 +161,7 @@ kbd{background:var(--soft);border:1px solid var(--line);border-radius:4px;paddin
       <label><input type="checkbox" id="oNotation"> Notación (desde Ego)</label>
       <label><input type="checkbox" id="oTerms"> Términos émicos</label>
       <label><input type="checkbox" id="oDates"> Fechas</label>
+      <label title="Ordena a los hijos de cada unión por el año del campo Fechas (mayor a la izquierda)"><input type="checkbox" id="oSort"> Ordenar hijos por año</label>
       <label>Símbolos
         <select id="oMale" aria-label="Símbolo de varón">
           <option value="tri">△ varón · ○ mujer</option>
@@ -228,12 +246,35 @@ kbd{background:var(--soft);border:1px solid var(--line);border-radius:4px;paddin
    CONSTANTES Y UTILIDADES
    ===================================================================== */
 const PW = 130;      // ancho reservado por persona
-const UGAP = 44;     // hueco entre unidades (pareja + cónyuges)
-const GY = 210;      // distancia vertical entre generaciones
+const UGAP = 44;     // hueco entre unidades de la MISMA fratría (hermanos y sus cónyuges)
+const UGAP2 = 84;    // hueco entre unidades de fratrías distintas (primos, otras ramas)
+const GYMIN = 226;   // distancia vertical mínima entre generaciones
 const R = 24;        // radio del símbolo
-const BAR = 108;     // caída hasta la barra de hermanos
+const BAR = 120;     // caída hasta la primera barra de hermanos
+const LS = 16;       // separación entre barras de hermanos escalonadas
+const BAR_MARGIN = 22; // hueco mínimo para que dos barras compartan nivel
 const INK = '#1d2733', ACC = '#0f766e', EGO = '#c2410c', WARN = '#b45309', PAPER = '#fbf8f3';
-const MARKS = [['Ninguna', '#ffffff'], ['Gris', '#b9c0c7'], ['Negro', '#1d2733'], ['Verde', '#7cc8c0']];
+const MARK_COLORS = ['', '#b9c0c7', '#1d2733', '#7cc8c0']; // rellenos antiguos (campo «mark»), solo para migrar archivos viejos
+const PALETTE = [['#d9dde1', 'Gris claro'], ['#9aa5b1', 'Gris'], ['#4b5563', 'Gris oscuro'], ['#1d2733', 'Negro'],
+  ['#fecaca', 'Rosa'], ['#ef4444', 'Rojo'], ['#b91c1c', 'Rojo oscuro'], ['#fed7aa', 'Durazno'], ['#f97316', 'Naranja'],
+  ['#c2410c', 'Terracota'], ['#fde68a', 'Amarillo claro'], ['#eab308', 'Amarillo'], ['#92400e', 'Café'], ['#bbf7d0', 'Verde claro'],
+  ['#22c55e', 'Verde'], ['#15803d', 'Verde oscuro'], ['#99f6e4', 'Turquesa claro'], ['#14b8a6', 'Turquesa'], ['#0f766e', 'Verde azulado'],
+  ['#7cc8c0', 'Menta'], ['#bfdbfe', 'Azul claro'], ['#3b82f6', 'Azul'], ['#1d4ed8', 'Azul oscuro'], ['#e9d5ff', 'Lila'], ['#a855f7', 'Violeta'], ['#ec4899', 'Rosa fuerte']];
+const PATS = [['', 'Liso'], ['diag1', 'Diagonal /'], ['diag2', 'Diagonal \\'], ['horiz', 'Horizontal'], ['vert', 'Vertical'], ['grid', 'Cuadrícula'], ['dots', 'Puntos'], ['cross', 'Cruzado']];
+const ENK_COLORS = {Rojo: '#e74c3c', Azul: '#3498db', Verde: '#2ecc71', Amarillo: '#f1c40f', Gris: '#95a5a6', Negro: '#2c3e50'};
+const ENK_PATS = {'Punteado (Claro)': 'dots', 'Rayado (Medio)': 'diag1', 'Achurado (Denso)': 'cross'};
+
+function parseHex(s) {
+  s = String(s || '').trim().replace(/^#/, '');
+  if (/^[0-9a-f]{3}$/i.test(s)) s = s.split('').map(c => c + c).join('');
+  return /^[0-9a-f]{6}$/i.test(s) ? '#' + s.toLowerCase() : '';
+}
+const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const hex2 = a => '#' + a.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+const mix = (h1, h2, t) => { const a = rgb(h1), b = rgb(h2); return hex2(a.map((v, i) => v + (b[i] - v) * t)); };
+const lum = h => { const [r, g, b] = rgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; };
+// Color de las rayas: oscuro sobre fondos claros, claro sobre fondos oscuros
+const strokeFor = bg => bg === '#ffffff' ? INK : lum(bg) > 0.3 ? mix(bg, INK, .55) : mix(bg, '#ffffff', .6);
 const STATUS = [['casados', 'Casados'], ['libre', 'Unión libre'], ['separados', 'Separados / divorciados']];
 const LS_KEY = 'kinmap:doc:v1';
 
@@ -252,7 +293,17 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
            unions:{id:{id,a,b,status,kids:[ids]}}, opts }
    Una unión es una pareja (a, b; cualquiera puede faltar) y sus hijos.
    ===================================================================== */
-const blankDoc = () => ({v: 1, title: '', ego: null, people: {}, unions: {}, opts: {notation: true, terms: true, dates: true, male: 'tri'}});
+const blankDoc = () => ({v: 1, title: '', ego: null, people: {}, unions: {}, opts: {notation: true, terms: true, dates: true, male: 'tri', sortKids: true}});
+
+// Primer año (3-4 dígitos) del campo «Fechas»; sirve para ordenar a los hermanos.
+const yearOf = s => { const m = /\d{3,4}/.exec(String(s || '')); return m ? +m[0] : null; };
+// Ordena de mayor a menor (el/la mayor a la izquierda) solo a quienes tienen año; los demás conservan su lugar.
+function sortKids(d, u) {
+  const slots = [], items = [];
+  u.kids.forEach((k, i) => { const y = yearOf(d.people[k] && d.people[k].born); if (y !== null) { slots.push(i); items.push({k, y, i}); } });
+  items.sort((a, b) => a.y - b.y || a.i - b.i);
+  slots.forEach((pos, j) => { u.kids[pos] = items[j].k; });
+}
 
 function normalize(d) {
   const o = blankDoc();
@@ -261,8 +312,10 @@ function normalize(d) {
   Object.assign(o.opts, d.opts && typeof d.opts === 'object' ? d.opts : {});
   for (const [id, p] of Object.entries(d.people || {})) {
     if (!p || typeof p !== 'object') continue;
+    // Archivos antiguos traían «mark» (0-3); ahora hay color libre + achurado.
+    const hex = parseHex(p.color) || (p.color ? '' : MARK_COLORS[Math.min(3, Math.max(0, +p.mark || 0))]);
     o.people[id] = {id, name: String(p.name ?? ''), sex: ['M', 'F', 'U'].includes(p.sex) ? p.sex : 'U', dead: !!p.dead,
-      born: String(p.born ?? ''), note: String(p.note ?? ''), term: String(p.term ?? ''), mark: Math.min(3, Math.max(0, +p.mark || 0))};
+      born: String(p.born ?? ''), note: String(p.note ?? ''), term: String(p.term ?? ''), color: hex, pat: PATS.some(([v]) => v && v === p.pat) ? p.pat : ''};
   }
   for (const [id, u] of Object.entries(d.unions || {})) {
     if (!u || typeof u !== 'object') continue;
@@ -280,6 +333,7 @@ function tidy(d) {
   const seenKid = new Set();
   for (const [id, u] of Object.entries(d.unions)) {
     u.kids = u.kids.filter(k => d.people[k] && k !== u.a && k !== u.b && !seenKid.has(k) && (seenKid.add(k), true));
+    if (d.opts && d.opts.sortKids !== false) sortKids(d, u);
     if (!u.a && !u.b) delete d.unions[id];
     else if ((!u.a || !u.b) && !u.kids.length) delete d.unions[id];
   }
@@ -291,7 +345,7 @@ function fromEthnokin(raw) {
   for (const [id, i] of Object.entries(raw.individuals || {})) {
     const g = i.gender || '';
     d.people[id] = {id, name: [i.name, i.ap_pat, i.ap_mat].filter(Boolean).join(' '), sex: g.includes('Hombre') ? 'M' : g.includes('Mujer') ? 'F' : 'U',
-      dead: i.vital_status === 'Fallecido', born: '', term: '', mark: 0,
+      dead: i.vital_status === 'Fallecido', born: '', term: '', color: ENK_COLORS[i.color] || '', pat: ENK_PATS[i.pattern] || '',
       note: [i.birthplace && 'Lugar: ' + i.birthplace, i.clan && 'Clan: ' + i.clan].filter(Boolean).join(' · ')};
   }
   for (const [id, f] of Object.entries(raw.families || {}))
@@ -353,6 +407,7 @@ function classify(tk) {
    ===================================================================== */
 function computeLayout(d) {
   const ids = Object.keys(d.people);
+  barLv = {};
   if (!ids.length) return {};
   const us = Object.values(d.unions), rel = relations(d);
   const hasPar = {}; for (const u of us) for (const k of u.kids) hasPar[k] = true;
@@ -407,10 +462,10 @@ function computeLayout(d) {
     units.forEach((u, i) => {
       let b = {idx: [i], offs: [0], len: u.w, s: ds[i]};
       while (blocks.length) {
-        const a = blocks[blocks.length - 1];
-        if (b.s >= a.s + a.len + UGAP - 1e-6) break;
+        const a = blocks[blocks.length - 1], gp = gapOf(units[a.idx[a.idx.length - 1]], units[b.idx[0]]);
+        if (b.s >= a.s + a.len + gp - 1e-6) break;
         blocks.pop();
-        const sh = a.len + UGAP, m = {idx: a.idx.concat(b.idx), offs: a.offs.concat(b.offs.map(o => o + sh)), len: a.len + UGAP + b.len};
+        const sh = a.len + gp, m = {idx: a.idx.concat(b.idx), offs: a.offs.concat(b.offs.map(o => o + sh)), len: a.len + gp + b.len};
         m.s = mean(m.idx.map((ix, k) => ds[ix] - m.offs[k])); b = m;
       }
       blocks.push(b);
@@ -420,9 +475,11 @@ function computeLayout(d) {
     setUnits(units, starts);
   };
   const ucenter = u => u.s + u.w / 2;
-  for (const units of gens) { let x = 0; setUnits(units, units.map(u => { const s = x; x += u.w + UGAP; return s; })); }
-
   const parentU = {}; for (const u of us) for (const k of u.kids) parentU[k] = u;
+  // Cada unidad recuerda de qué uniones de padres vienen sus miembros: misma fratría = más juntos; ramas distintas = más aire.
+  for (const units of gens) for (const u of units) u.pus = new Set(u.m.map(p => parentU[p] && parentU[p].id).filter(Boolean));
+  const gapOf = (a, b) => [...a.pus].some(x => b.pus.has(x)) ? UGAP : UGAP2;
+  for (const units of gens) { let x = 0; setUnits(units, units.map((u, i) => { const s = x; x += u.w + (units[i + 1] ? gapOf(u, units[i + 1]) : 0); return s; })); }
   for (let it = 0; it < 8; it++) {
     for (let g = 1; g <= G; g++) {
       const units = gens[g], des = new Map();
@@ -443,8 +500,34 @@ function computeLayout(d) {
       });
     }
   }
-  const pos = {}; ids.forEach(i => pos[i] = {x: cx[i], y: gen[i] * GY, g: gen[i]});
+  const pos = {}; ids.forEach(i => pos[i] = {x: cx[i], y: 0, g: gen[i]});
+  // Barras de hermanos escalonadas; cada generación crece lo necesario para que quepan.
+  const bars = computeBars(d, pos); barLv = bars.lv;
+  const ys = [0];
+  for (let g = 0; g < G; g++) ys.push(ys[g] + Math.max(GYMIN, 176 + LS * (bars.maxLv[g] || 0)));
+  ids.forEach(i => pos[i].y = ys[gen[i]]);
   return pos;
+}
+
+// Asigna a cada unión con hijos un «nivel» de barra: si dos barras se tocan o se solapan en X, la segunda baja un nivel.
+function computeBars(d, pos) {
+  const byGen = {}, lv = {}, maxLv = {};
+  for (const u of Object.values(d.unions)) {
+    const A = u.a && pos[u.a], B = u.b && pos[u.b], P = A || B; if (!P) continue;
+    const xs = u.kids.filter(k => pos[k]).map(k => pos[k].x); if (!xs.length) continue;
+    const dropX = A && B ? (A.x + B.x) / 2 : P.x;
+    if (xs.length === 1 && Math.abs(xs[0] - dropX) <= 12) continue;      // hijo/a único bajo sus padres: no hay barra
+    (byGen[P.g] ||= []).push({id: u.id, lo: Math.min(dropX, ...xs), hi: Math.max(dropX, ...xs)});
+  }
+  for (const g in byGen) {
+    const last = []; let mx = 0;
+    for (const it of byGen[g].sort((a, b) => a.lo - b.lo || a.hi - b.hi)) {
+      let L = 0; while (last[L] !== undefined && it.lo <= last[L] + BAR_MARGIN) L++;
+      last[L] = it.hi; lv[it.id] = L; mx = Math.max(mx, L);
+    }
+    maxLv[g] = mx;
+  }
+  return {lv, maxLv};
 }
 
 function bounds(pos) {
@@ -474,8 +557,27 @@ function wrap(t, n) {
   return r.map(s => s.length > n + 3 ? s.slice(0, n + 2) + '…' : s);
 }
 
+function patternDef(df) {
+  const {id, pat, bg, stroke} = df, S = pat === 'dots' ? 6 : 7, w = 1.5;
+  const d1 = `<path d="M0,${S}L${S},0M-1,1L1,-1M${S - 1},${S + 1}L${S + 1},${S - 1}"/>`;
+  const d2 = `<path d="M0,0L${S},${S}M-1,${S - 1}L1,${S + 1}M${S - 1},-1L${S + 1},1"/>`;
+  const hz = `<path d="M0,${S / 2}H${S}"/>`, vt = `<path d="M${S / 2},0V${S}"/>`;
+  const body = pat === 'diag1' ? d1 : pat === 'diag2' ? d2 : pat === 'horiz' ? hz : pat === 'vert' ? vt : pat === 'grid' ? hz + vt
+    : pat === 'cross' ? d1 + d2 : `<circle cx="${S / 2}" cy="${S / 2}" r="1.35" fill="${stroke}" stroke="none"/>`;
+  return `<pattern id="${id}" width="${S}" height="${S}" patternUnits="userSpaceOnUse"><rect width="${S}" height="${S}" fill="${bg}"/><g stroke="${stroke}" stroke-width="${w}" fill="none">${body}</g></pattern>`;
+}
+
 function svgBody(pos, o) {
   const d = o.doc, paper = o.paper, kin = o.kin, edges = [], nodes = [];
+  // Rellenos: color libre (hex) y achurado opcional. Los ids llevan prefijo para no chocar entre el lienzo y la impresión.
+  const defs = new Map(), idp = o.idp || 'm';
+  const fillFor = p => {
+    const bg = p.color || '#ffffff';
+    if (!p.pat) return bg;
+    const key = p.pat + bg;
+    if (!defs.has(key)) defs.set(key, {id: `${idp}-${p.pat}-${bg.slice(1)}`, pat: p.pat, bg, stroke: strokeFor(bg)});
+    return `url(#${defs.get(key).id})`;
+  };
   const line = (x1, y1, x2, y2, extra = '') => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${INK}" stroke-width="2" stroke-linecap="round" ${extra}/>`;
   const allPos = Object.values(pos);
 
@@ -509,7 +611,8 @@ function svgBody(pos, o) {
     const kp = u.kids.filter(k => pos[k]);
     let trunk = '';
     if (kp.length) {
-      const barY = y0 + BAR, xs = kp.map(k => pos[k].x);
+      const barY = y0 + BAR + (barLv[u.id] || 0) * LS, xs = kp.map(k => pos[k].x);
+      if (kp.length === 1 && Math.abs(xs[0] - dropX) <= 12) dropX = xs[0];   // hijo/a único bajo sus padres: línea recta, sin «escalón»
       parts.push(line(dropX, dropY, dropX, barY));
       const lo = Math.min(dropX, ...xs), hi = Math.max(dropX, ...xs);
       if (hi > lo) parts.push(line(lo, barY, hi, barY));
@@ -528,7 +631,7 @@ function svgBody(pos, o) {
     const sel = o.sel && o.sel.t === 'p' && o.sel.id === id, isEgo = d.ego === id;
     let g = `<g data-pid="${esc(id)}" ${o.interactive ? 'style="cursor:pointer"' : ''}>`;
     if (sel) g += `${shape(p.sex, q.x, q.y, 1.55, d.opts.male)} fill="${ACC}" fill-opacity=".2"/>`;
-    g += `${shape(p.sex, q.x, q.y, 1, d.opts.male)} fill="${MARKS[p.mark][1]}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
+    g += `${shape(p.sex, q.x, q.y, 1, d.opts.male)} fill="${fillFor(p)}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
     if (isEgo) g += `${shape(p.sex, q.x, q.y, 1.32, d.opts.male)} fill="none" stroke="${EGO}" stroke-width="2.5" stroke-linejoin="round"/>`;
     if (p.dead) g += line(q.x - R * 1.25, q.y + R * 1.25, q.x + R * 1.25, q.y - R * 1.25, 'stroke-width="2.6"');
     const L = [];
@@ -540,7 +643,8 @@ function svgBody(pos, o) {
     L.forEach(([t, a], i) => { g += `<text x="${q.x}" y="${q.y + R + 20 + i * 15}" text-anchor="middle" ${a} ${halo}>${esc(t)}</text>`; });
     nodes.push(g + '</g>');
   }
-  return edges.join('') + nodes.join('');
+  const defStr = defs.size ? '<defs>' + [...defs.values()].map(patternDef).join('') + '</defs>' : '';
+  return defStr + edges.join('') + nodes.join('');
 }
 
 /* =====================================================================
@@ -548,7 +652,7 @@ function svgBody(pos, o) {
    ===================================================================== */
 let doc = blankDoc(), sel = null, tab = 'person';
 let hist = [], fut = [], lastKey = null, lastT = 0;
-let kin = {}, layoutPos = {}, shownPos = {}, anim = null;
+let kin = {}, layoutPos = {}, shownPos = {}, anim = null, barLv = {};
 const view = {x: 40, y: 40, k: 1};
 const svg = $('#svg'), world = $('#world');
 
@@ -567,7 +671,7 @@ function undo() { if (!hist.length) return; fut.push(JSON.stringify(doc)); resto
 function redo() { if (!fut.length) return; hist.push(JSON.stringify(doc)); restore(fut.pop()); lastKey = null; }
 
 function uid(prefix) { let id; do { id = prefix + Math.random().toString(36).slice(2, 6); } while (doc.people[id] || doc.unions[id]); return id; }
-function newPerson(name, sex) { const id = uid('p'); doc.people[id] = {id, name, sex, dead: false, born: '', note: '', term: '', mark: 0}; return id; }
+function newPerson(name, sex) { const id = uid('p'); doc.people[id] = {id, name, sex, dead: false, born: '', note: '', term: '', color: '', pat: ''}; return id; }
 const unionsOf = id => Object.values(doc.unions).filter(u => u.a === id || u.b === id);
 const parentUnion = id => Object.values(doc.unions).find(u => u.kids.includes(id));
 const personName = id => (doc.people[id] && doc.people[id].name) || '(sin nombre)';
@@ -642,8 +746,10 @@ function deletePerson(id) {
 }
 function deleteUnion(id) { commit(d => { delete d.unions[id]; }); sel = null; refresh({}); }
 
-function setField(id, f, v) {
-  commit(d => { const p = d.people[id]; if (!p) return; p[f] = f === 'mark' ? +v : f === 'dead' ? !!v : v; }, {key: 'f:' + id + f, keepPanel: f !== 'sex' && f !== 'dead' && f !== 'mark', animate: false});
+function setField(id, f, v, o = {}) {
+  // «born» puede reordenar a los hermanos, así que ahí sí se anima el cambio de posición.
+  commit(d => { const p = d.people[id]; if (!p) return; p[f] = f === 'dead' ? !!v : v; },
+    {key: 'f:' + id + f, keepPanel: !(o.rerender || f === 'sex' || f === 'dead'), animate: f === 'born'});
 }
 
 /* =====================================================================
@@ -668,9 +774,20 @@ function personPanel(id) {
   <label for="f-name">Nombre</label><input type="text" id="f-name" data-f="name" value="${esc(p.name)}" autocomplete="off">
   <label>Sexo</label>
   <div class="seg" role="group" aria-label="Sexo">${[['M', 'Varón'], ['F', 'Mujer'], ['U', 'Desconocido']].map(([v, t]) => `<button data-act="sex" data-v="${v}" aria-pressed="${p.sex === v}">${t}</button>`).join('')}</div>
-  <div class="grid2">
-    <div><label for="f-born">Fechas</label><input type="text" id="f-born" data-f="born" value="${esc(p.born)}" placeholder="1950 – 2015" autocomplete="off"></div>
-    <div><label for="f-mark">Relleno</label><select id="f-mark" data-f="mark">${optHtml(MARKS.map(([n], i) => [i, n]), String(p.mark))}</select></div>
+  <label for="f-born">Fechas${doc.opts.sortKids !== false ? ' <span style="font-weight:400">(el primer año ordena a los hermanos)</span>' : ''}</label>
+  <input type="text" id="f-born" data-f="born" value="${esc(p.born)}" placeholder="1950 – 2015" autocomplete="off">
+  <label>Color de relleno</label>
+  <div class="swatches" role="group" aria-label="Paleta de colores">
+    <button class="sw none" data-act="color" data-v="" title="Sin color" aria-label="Sin color" aria-pressed="${!p.color}"></button>
+    ${PALETTE.map(([h, n]) => `<button class="sw" data-act="color" data-v="${h}" style="background:${h}" title="${n}" aria-label="${n}" aria-pressed="${p.color === h}"></button>`).join('')}
+  </div>
+  <div class="hexrow">
+    <input type="color" id="f-pick" data-f="pick" value="${p.color || '#ffffff'}" aria-label="Elegir cualquier color">
+    <input type="text" id="f-hex" data-f="hex" value="${esc(p.color)}" placeholder="Código hexadecimal, p. ej. #c2410c" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Código hexadecimal del color">
+  </div>
+  <label>Achurado</label>
+  <div class="pats" role="group" aria-label="Achurado">
+    ${PATS.map(([v, n]) => `<button data-act="pat" data-v="${v}" title="${n}" aria-label="${n}" aria-pressed="${p.pat === v}"><span class="pv ${v}" style="background-color:${p.color || '#fff'}"></span></button>`).join('')}
   </div>
   <label style="display:flex;align-items:center;gap:6px;margin-top:10px"><input type="checkbox" data-f="dead" ${p.dead ? 'checked' : ''}> Fallecido/a</label>
   <label for="f-term">Término émico <span style="font-weight:400">(cómo lo/la llama Ego)</span></label><input type="text" id="f-term" data-f="term" value="${esc(p.term)}" autocomplete="off">
@@ -701,9 +818,12 @@ function unionPanel(id) {
   <label for="u-status">Tipo de unión</label>
   <select id="u-status" data-u="status">${optHtml(STATUS, u.status)}</select>
   <label>Hijos <span style="font-weight:400">(de izquierda a derecha)</span></label>
-  <ul class="plain">${u.kids.map((k, i) => `<li><span class="t">${i + 1}. ${esc(personName(k))}</span>
-    <button data-act="kup" data-i="${i}" ${i ? '' : 'disabled'} aria-label="Subir">←</button><button data-act="kdn" data-i="${i}" ${i < u.kids.length - 1 ? '' : 'disabled'} aria-label="Bajar">→</button>
-    <button data-act="kpick" data-id="${esc(k)}">Ver</button><button data-act="krm" data-i="${i}" class="danger" aria-label="Quitar de la unión">✕</button></li>`).join('') || '<li class="muted">Sin hijos</li>'}</ul>
+  ${doc.opts.sortKids !== false ? '<p class="muted" style="font-size:12px;margin:0">Orden automático: quienes tienen año de nacimiento se ordenan de mayor a menor; los demás conservan su lugar. Puedes desactivarlo en «Ordenar hijos por año».</p>' : ''}
+  <ul class="plain">${u.kids.map((k, i) => { const auto = doc.opts.sortKids !== false, dated = x => yearOf(doc.people[x].born) !== null;
+    const noUp = !i || (auto && dated(k) && dated(u.kids[i - 1])), noDn = i >= u.kids.length - 1 || (auto && dated(k) && dated(u.kids[i + 1]));
+    return `<li><span class="t">${i + 1}. ${esc(personName(k))}${dated(k) ? ` <small class="muted">${yearOf(doc.people[k].born)}</small>` : ''}</span>
+    <button data-act="kup" data-i="${i}" ${noUp ? 'disabled' : ''} aria-label="Subir">←</button><button data-act="kdn" data-i="${i}" ${noDn ? 'disabled' : ''} aria-label="Bajar">→</button>
+    <button data-act="kpick" data-id="${esc(k)}">Ver</button><button data-act="krm" data-i="${i}" class="danger" aria-label="Quitar de la unión">✕</button></li>`; }).join('') || '<li class="muted">Sin hijos</li>'}</ul>
   <div class="grid2" style="margin-top:8px">
     <button data-act="ukid">＋ Hijo/a nuevo</button>
     <button data-act="upart" ${u.a && u.b ? 'disabled' : ''}>＋ Pareja</button>
@@ -749,6 +869,17 @@ function renderPanel() {
 const panel = $('#panelBody');
 panel.addEventListener('input', e => {
   const t = e.target;
+  if ((t.dataset.f === 'hex' || t.dataset.f === 'pick') && sel && sel.t === 'p') {
+    const h = parseHex(t.value);
+    if (!h) return;                                  // se sigue escribiendo: no cambiar nada hasta que el código sea válido
+    setField(sel.id, 'color', h);
+    const hx = $('#f-hex'), pk = $('#f-pick');
+    if (t.dataset.f === 'pick' && hx) hx.value = h;
+    if (t.dataset.f === 'hex' && pk) pk.value = h;
+    $$('.sw[data-act=color]', panel).forEach(b => b.setAttribute('aria-pressed', b.dataset.v === h));
+    $$('.pv', panel).forEach(s => s.style.backgroundColor = h);
+    return;
+  }
   if (t.dataset.f && sel && sel.t === 'p') { if (t.type === 'checkbox') setField(sel.id, t.dataset.f, t.checked); else if (t.tagName !== 'SELECT') setField(sel.id, t.dataset.f, t.value); }
   else if (t.dataset.t) commit(d => { d.people[t.dataset.t].term = t.value; }, {key: 'term' + t.dataset.t, keepPanel: true, animate: false});
 });
@@ -765,6 +896,8 @@ panel.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const a = b.dataset.act, id = sel && sel.id;
   if (a === 'sex') setField(id, 'sex', b.dataset.v);
+  else if (a === 'color') setField(id, 'color', b.dataset.v, {rerender: true});
+  else if (a === 'pat') setField(id, 'pat', b.dataset.v, {rerender: true});
   else if (a === 'add') addRelative(id, b.dataset.rel);
   else if (a === 'ego') { commit(d => { d.ego = id; }, {animate: false}); toast('Ego: ' + personName(id)); }
   else if (a === 'delp') deletePerson(id);
@@ -820,6 +953,7 @@ function reveal(id) {
 }
 function syncOpts() {
   $('#oNotation').checked = doc.opts.notation; $('#oTerms').checked = doc.opts.terms; $('#oDates').checked = doc.opts.dates; $('#oMale').value = doc.opts.male;
+  $('#oSort').checked = doc.opts.sortKids !== false;
   if (document.activeElement !== $('#title')) $('#title').value = doc.title;
   $('#btnUndo').disabled = !hist.length; $('#btnRedo').disabled = !fut.length;
 }
@@ -878,7 +1012,7 @@ function exportSvgString(sized = true) {
   const size = sized ? ` width="${w}" height="${h}"` : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"${size} font-family="Segoe UI,Helvetica,Arial,sans-serif"><rect width="${w}" height="${h}" fill="#fff"/>` +
     (th ? `<text x="${m}" y="${m + 14}" font-size="20" font-weight="700" fill="${INK}">${esc(doc.title)}</text>` : '') +
-    `<g transform="translate(${m - b.x0} ${m + th - b.y0})">${svgBody(layoutPos, {doc, kin, sel: null, paper: '#ffffff', interactive: false})}</g></svg>`;
+    `<g transform="translate(${m - b.x0} ${m + th - b.y0})">${svgBody(layoutPos, {doc, kin, sel: null, paper: '#ffffff', interactive: false, idp: 'x'})}</g></svg>`;
 }
 function exportCsv() {
   const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
@@ -956,6 +1090,7 @@ function openFile(file) {
    ===================================================================== */
 $('#title').addEventListener('input', e => commit(d => { d.title = e.target.value; }, {key: 'title', keepPanel: true, animate: false}));
 for (const [id, k] of [['oNotation', 'notation'], ['oTerms', 'terms'], ['oDates', 'dates']]) $('#' + id).addEventListener('change', e => commit(d => { d.opts[k] = e.target.checked; }, {animate: false, keepPanel: true}));
+$('#oSort').addEventListener('change', e => commit(d => { d.opts.sortKids = e.target.checked; }));
 $('#oMale').addEventListener('change', e => commit(d => { d.opts.male = e.target.value; }, {animate: false, keepPanel: true}));
 $('#btnUndo').onclick = undo; $('#btnRedo').onclick = redo;
 $('#btnExamples').onclick = () => $('#dlgExamples').showModal();
