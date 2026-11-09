@@ -56,6 +56,7 @@ header .sp{flex:1}
 #empty[hidden]{display:none}
 #empty h2{margin:6px 0;font-size:20px;color:#1d2733}
 #empty .btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.zoomgrp{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 #zoomlbl{min-width:44px;text-align:center;font-size:12px;color:var(--muted)}
 .hint{padding:5px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
 
@@ -65,14 +66,14 @@ aside{background:var(--panel);border:1px solid var(--line);border-radius:12px;bo
 .tabs button{flex:1;border:0;border-radius:0;border-bottom:2px solid transparent;background:transparent;padding:10px}
 .tabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent);font-weight:700}
 #panelBody{padding:6px 14px 18px}
-.swatches{display:grid;grid-template-columns:repeat(9,1fr);gap:5px}
-.sw{aspect-ratio:1;min-width:0;padding:0;border:1px solid rgba(0,0,0,.25);border-radius:6px}
+.swatches{display:grid;grid-template-columns:repeat(9,22px);gap:4px;justify-content:start}
+.sw{width:22px;height:22px;min-width:0;padding:0;border:1px solid rgba(0,0,0,.25);border-radius:4px}
 .sw[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:2px}
 .sw.none{background-image:linear-gradient(135deg,transparent 46%,#c2410c 46% 54%,transparent 54%);background-color:#fff}
 .hexrow{display:grid;grid-template-columns:46px 1fr;gap:8px;margin-top:8px}
 .hexrow input[type=color]{width:46px;height:34px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
-.pats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.pats button{height:36px;padding:4px}
+.pats{display:grid;grid-template-columns:repeat(4,46px);gap:5px;justify-content:start}
+.pats button{width:46px;height:26px;padding:3px}
 .pats button[aria-pressed=true]{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:0}
 .pv{display:block;width:100%;height:100%;border:1px solid #1d2733;border-radius:3px;background-color:#fff}
 .pv.diag1{background-image:repeating-linear-gradient(135deg,#1d2733 0 1.5px,transparent 1.5px 6px)}
@@ -100,6 +101,28 @@ ul.plain li .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-s
 ul.plain button{padding:1px 7px}
 details{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:6px 12px}
 details summary{cursor:pointer;font-weight:600;padding:3px 0}
+details.dd{margin:0;padding:0;border-radius:8px;background:var(--panel)}
+.dd>summary{display:flex;align-items:center;gap:8px;padding:4px 8px;font-weight:500;list-style:none}
+.dd>summary::-webkit-details-marker{display:none}
+.dd>summary::after{content:"▾";margin-left:auto;padding-left:6px;color:var(--muted);font-size:11px}
+.dd[open]>summary::after{content:"▴"}
+.dd .ddbody{padding:6px 8px 8px;border-top:1px solid var(--line)}
+.dd .cur{width:18px;height:18px;border-radius:4px;border:1px solid rgba(0,0,0,.3);flex:none}
+.dd .cur.none{background-image:linear-gradient(135deg,transparent 46%,#c2410c 46% 54%,transparent 54%);background-color:#fff}
+.dd .pv{width:34px;height:18px;flex:none}
+.opts details.pop{position:relative}
+.opts details.pop>summary{padding:3px 10px;cursor:pointer}
+.pop .ddbody{position:absolute;top:calc(100% + 4px);left:0;z-index:30;width:250px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
+.pop .ddbody label{margin:6px 0 2px;font-size:12px}
+.pop .ddbody select{width:100%}
+button[aria-pressed=true].tog{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.editbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--soft);font-size:12px}
+.editbar[hidden]{display:none}
+.editbar .grp{display:inline-flex;align-items:center;gap:3px}
+.editbar .grp b{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-right:3px;font-weight:600}
+.editbar button{padding:2px 8px;font-size:12px}
+.editbar .cnt{color:var(--muted)}
+#marq{position:absolute;border:1.5px dashed var(--accent);background:rgba(15,118,110,.1);pointer-events:none;display:none;z-index:4}
 table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
 th,td{text-align:left;padding:4px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
 th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
@@ -168,13 +191,35 @@ kbd{background:var(--soft);border:1px solid var(--line);border-radius:4px;paddin
           <option value="sq">□ varón · ○ mujer</option>
         </select>
       </label>
+      <details class="dd pop" id="ddLines"><summary>Líneas</summary><div class="ddbody">
+        <label for="lnMar">Matrimonio</label>
+        <select id="lnMar"><option value="double">Doble (=)</option><option value="single">Simple</option><option value="thick">Gruesa</option></select>
+        <label for="lnKid">Bajadas de los hijos</label>
+        <select id="lnKid"><option value="solid">Continua</option><option value="dash">Discontinua</option><option value="dot">Punteada</option></select>
+        <label for="lnSib">Barra de hermanos</label>
+        <select id="lnSib"><option value="solid">Continua</option><option value="dash">Discontinua</option><option value="dot">Punteada</option></select>
+        <label for="lnRoute">Conexión con los hijos</label>
+        <select id="lnRoute"><option value="ortho">En ángulo, con barra</option><option value="curve">Curva</option><option value="fan">Diagonal (abanico)</option></select>
+        <label for="lnW">Grosor de las líneas</label>
+        <select id="lnW"><option value="1.5">Fino</option><option value="2">Normal</option><option value="3">Grueso</option></select>
+        <button id="lnReset" style="margin-top:8px;width:100%">Restablecer estilo</button>
+      </div></details>
+      <button id="btnEdit" class="tog" aria-pressed="false" title="Mover personas, alinear y distribuir">✎ Editar</button>
       <span class="sp"></span>
-      <button id="zOut" class="ghost" aria-label="Alejar">－</button>
+      <span class="zoomgrp"><button id="zOut" class="ghost" aria-label="Alejar">－</button>
       <span id="zoomlbl">100%</span>
       <button id="zIn" class="ghost" aria-label="Acercar">＋</button>
-      <button id="zFit">Ajustar</button>
+      <button id="zFit">Ajustar</button></span>
+    </div>
+    <div class="editbar" id="editbar" hidden>
+      <span class="grp"><b>Alinear</b><button data-op="left" title="Alinear a la izquierda">Izq.</button><button data-op="cx" title="Centrar horizontalmente">Centro</button><button data-op="right" title="Alinear a la derecha">Der.</button><button data-op="top" title="Alinear arriba">Arriba</button><button data-op="cy" title="Centrar verticalmente">Medio</button><button data-op="bottom" title="Alinear abajo">Abajo</button></span>
+      <span class="grp"><b>Distribuir</b><button data-op="dh" title="Distribuir horizontalmente (3 o más)">Horiz.</button><button data-op="dv" title="Distribuir verticalmente (3 o más)">Vert.</button></span>
+      <span class="grp"><b>Mover</b><button data-op="l" aria-label="Izquierda">←</button><button data-op="u" aria-label="Arriba">↑</button><button data-op="d" aria-label="Abajo">↓</button><button data-op="r" aria-label="Derecha">→</button></span>
+      <span class="grp"><button data-op="all-sel" title="Seleccionar todas las personas (Ctrl+A)">Seleccionar todo</button><button data-op="reset" title="Devuelve la posición automática a la selección">Restablecer selección</button><button data-op="reset-all" title="Quita todos los ajustes manuales">Auto-organizar todo</button></span>
+      <span class="cnt" id="editCnt"></span>
     </div>
     <div id="stage">
+      <div id="marq"></div>
       <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de parentesco"><g id="world"></g></svg>
       <div id="empty" hidden>
         <div>
@@ -222,6 +267,7 @@ kbd{background:var(--soft);border:1px solid var(--line);border-radius:4px;paddin
     <li><b>Construye</b> con el panel: selecciona a alguien y pulsa <i>Padre, Madre, Pareja, Hijo/a, Hermano/a</i>. El diagrama se reordena solo, no hace falta arrastrar nada.</li>
     <li><b>Marca a Ego</b> (★). Cada persona recibe su notación de parentesco y se clasifica como paralela o cruzada.</li>
     <li><b>Anota los términos</b> con que Ego llama a cada persona (pestaña «Términos y notación») para ver qué relaciones agrupa la terminología.</li>
+    <li><b>Modo Editar (✎):</b> arrastra personas, selecciona varias con un recuadro (Mayús suma) y usa Alinear, Distribuir o las flechas. «Auto-organizar todo» deshace los ajustes. El botón <i>Líneas</i> cambia el estilo de matrimonios, hijos y hermanos.</li>
     <li><b>Línea de unión:</b> haz clic en ella para cambiar su tipo, ordenar a los hijos o conectar personas ya existentes.</li>
   </ol>
   <div class="legend">
@@ -253,6 +299,7 @@ const R = 24;        // radio del símbolo
 const BAR = 120;     // caída hasta la primera barra de hermanos
 const LS = 16;       // separación entre barras de hermanos escalonadas
 const BAR_MARGIN = 22; // hueco mínimo para que dos barras compartan nivel
+const CHX = 52;      // espacio extra entre cónyuges consecutivos de una cadena (p. ej. un hombre con dos esposas) cuando tienen hijos
 const INK = '#1d2733', ACC = '#0f766e', EGO = '#c2410c', WARN = '#b45309', PAPER = '#fbf8f3';
 const MARK_COLORS = ['', '#b9c0c7', '#1d2733', '#7cc8c0']; // rellenos antiguos (campo «mark»), solo para migrar archivos viejos
 const PALETTE = [['#d9dde1', 'Gris claro'], ['#9aa5b1', 'Gris'], ['#4b5563', 'Gris oscuro'], ['#1d2733', 'Negro'],
@@ -261,6 +308,8 @@ const PALETTE = [['#d9dde1', 'Gris claro'], ['#9aa5b1', 'Gris'], ['#4b5563', 'Gr
   ['#22c55e', 'Verde'], ['#15803d', 'Verde oscuro'], ['#99f6e4', 'Turquesa claro'], ['#14b8a6', 'Turquesa'], ['#0f766e', 'Verde azulado'],
   ['#7cc8c0', 'Menta'], ['#bfdbfe', 'Azul claro'], ['#3b82f6', 'Azul'], ['#1d4ed8', 'Azul oscuro'], ['#e9d5ff', 'Lila'], ['#a855f7', 'Violeta'], ['#ec4899', 'Rosa fuerte']];
 const PATS = [['', 'Liso'], ['diag1', 'Diagonal /'], ['diag2', 'Diagonal \\'], ['horiz', 'Horizontal'], ['vert', 'Vertical'], ['grid', 'Cuadrícula'], ['dots', 'Puntos'], ['cross', 'Cruzado']];
+const DEFLN = {mar: 'double', kid: 'solid', sib: 'solid', route: 'ortho', w: 2};   // estilo de líneas por omisión
+const LN_OK = {mar: ['double', 'single', 'thick'], kid: ['solid', 'dash', 'dot'], sib: ['solid', 'dash', 'dot'], route: ['ortho', 'curve', 'fan'], w: [1.5, 2, 3]};
 const ENK_COLORS = {Rojo: '#e74c3c', Azul: '#3498db', Verde: '#2ecc71', Amarillo: '#f1c40f', Gris: '#95a5a6', Negro: '#2c3e50'};
 const ENK_PATS = {'Punteado (Claro)': 'dots', 'Rayado (Medio)': 'diag1', 'Achurado (Denso)': 'cross'};
 
@@ -293,7 +342,7 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
            unions:{id:{id,a,b,status,kids:[ids]}}, opts }
    Una unión es una pareja (a, b; cualquiera puede faltar) y sus hijos.
    ===================================================================== */
-const blankDoc = () => ({v: 1, title: '', ego: null, people: {}, unions: {}, opts: {notation: true, terms: true, dates: true, male: 'tri', sortKids: true}});
+const blankDoc = () => ({v: 1, title: '', ego: null, people: {}, unions: {}, opts: {notation: true, terms: true, dates: true, male: 'tri', sortKids: true, ln: {...DEFLN}}});
 
 // Primer año (3-4 dígitos) del campo «Fechas»; sirve para ordenar a los hermanos.
 const yearOf = s => { const m = /\d{3,4}/.exec(String(s || '')); return m ? +m[0] : null; };
@@ -310,12 +359,19 @@ function normalize(d) {
   if (!d || typeof d !== 'object') return o;
   o.title = String(d.title || '').slice(0, 90);
   Object.assign(o.opts, d.opts && typeof d.opts === 'object' ? d.opts : {});
+  const ln = {...DEFLN}, rl = d.opts && d.opts.ln && typeof d.opts.ln === 'object' ? d.opts.ln : {};
+  for (const k of Object.keys(DEFLN)) if (LN_OK[k].includes(k === 'w' ? +rl[k] : rl[k])) ln[k] = k === 'w' ? +rl[k] : rl[k];
+  o.opts.ln = ln;
   for (const [id, p] of Object.entries(d.people || {})) {
     if (!p || typeof p !== 'object') continue;
     // Archivos antiguos traían «mark» (0-3); ahora hay color libre + achurado.
     const hex = parseHex(p.color) || (p.color ? '' : MARK_COLORS[Math.min(3, Math.max(0, +p.mark || 0))]);
     o.people[id] = {id, name: String(p.name ?? ''), sex: ['M', 'F', 'U'].includes(p.sex) ? p.sex : 'U', dead: !!p.dead,
       born: String(p.born ?? ''), note: String(p.note ?? ''), term: String(p.term ?? ''), color: hex, pat: PATS.some(([v]) => v && v === p.pat) ? p.pat : ''};
+    // Ajustes manuales del modo «Editar»: desplazamiento respecto a la posición automática.
+    const ox = Math.round(+p.ox * 10) / 10, oy = Math.round(+p.oy * 10) / 10;
+    if (Number.isFinite(ox) && ox) o.people[id].ox = ox;
+    if (Number.isFinite(oy) && oy) o.people[id].oy = oy;
   }
   for (const [id, u] of Object.entries(d.unions || {})) {
     if (!u || typeof u !== 'object') continue;
@@ -449,18 +505,38 @@ function computeLayout(d) {
       if (seen.has(m)) continue;
       const comp = [], st = [m]; seen.add(m);
       while (st.length) { const c = st.pop(); comp.push(c); for (const n of rel.sp[c]) if (!seen.has(n) && gen[n] === g) { seen.add(n); st.push(n); } }
-      const mem = order(comp); units.push({m: mem, w: mem.length * PW, s: 0});
+      const mem = order(comp);
+      units.push({m: mem, offs: mem.map((_, j) => PW / 2 + j * PW), w: mem.length * PW, s: 0});
     }
     gens.push(units);
+  }
+  const unitOf = {}; for (const units of gens) for (const u of units) for (const p of u.m) unitOf[p] = u;
+  // Cadenas de cónyuges (alguien con varias parejas): se abren lo necesario para que el hijo/a único de cada pareja
+  // pueda caer en línea recta bajo su unión, sin invadir al de la pareja vecina.
+  for (let g = G - 1; g >= 0; g--) for (const u of gens[g]) {
+    if (u.m.length < 3) continue;
+    const prs = [];
+    for (let j = 1; j < u.m.length; j++) { const x = u.m[j - 1], y = u.m[j]; prs.push(us.find(q => (q.a === x && q.b === y) || (q.a === y && q.b === x))); }
+    let sp = PW + (prs.some(q => q && q.kids.length) ? CHX : 0);
+    for (let t = 0; t + 1 < prs.length; t++) {
+      const a = prs[t], b = prs[t + 1];
+      if (a && b && a.kids.length === 1 && b.kids.length === 1) {
+        const ka = unitOf[a.kids[0]], kb = unitOf[b.kids[0]];
+        sp = Math.max(sp, (ka.w - ka.offs[ka.m.indexOf(a.kids[0])]) + kb.offs[kb.m.indexOf(b.kids[0])] + UGAP);
+      }
+    }
+    u.offs = u.m.map((_, j) => PW / 2 + j * sp); u.w = u.offs[u.offs.length - 1] + PW / 2;
   }
 
   // 3) posiciones X: agrupación de bloques (PAV) para centrar padres sobre hijos y viceversa
   const cx = {};
-  const setUnits = (units, starts) => units.forEach((u, i) => { u.s = starts[i]; u.m.forEach((p, j) => cx[p] = starts[i] + j * PW + PW / 2); });
-  const place = (units, desired) => {
-    const ds = units.map(u => desired(u) - u.w / 2), blocks = [];
+  const setUnits = (units, starts) => units.forEach((u, i) => { u.s = starts[i]; u.m.forEach((p, j) => cx[p] = starts[i] + u.offs[j]); });
+  // ext(u) = [espacio a la izquierda del centro, espacio a la derecha]; por omisión, la mitad del ancho de la unidad.
+  const place = (units, desired, ext) => {
+    const E = units.map(u => ext ? ext(u) : [u.w / 2, u.w / 2]), len = E.map(e => e[0] + e[1]);
+    const ds = units.map((u, i) => desired(u) - E[i][0]), blocks = [];
     units.forEach((u, i) => {
-      let b = {idx: [i], offs: [0], len: u.w, s: ds[i]};
+      let b = {idx: [i], offs: [0], len: len[i], s: ds[i]};
       while (blocks.length) {
         const a = blocks[blocks.length - 1], gp = gapOf(units[a.idx[a.idx.length - 1]], units[b.idx[0]]);
         if (b.s >= a.s + a.len + gp - 1e-6) break;
@@ -471,41 +547,102 @@ function computeLayout(d) {
       blocks.push(b);
     });
     const starts = new Array(units.length);
-    for (const b of blocks) b.idx.forEach((ix, k) => starts[ix] = b.s + b.offs[k]);
+    for (const b of blocks) b.idx.forEach((ix, k) => starts[ix] = b.s + b.offs[k] + E[ix][0] - units[ix].w / 2);
     setUnits(units, starts);
   };
   const ucenter = u => u.s + u.w / 2;
   const parentU = {}; for (const u of us) for (const k of u.kids) parentU[k] = u;
   // Cada unidad recuerda de qué uniones de padres vienen sus miembros: misma fratría = más juntos; ramas distintas = más aire.
-  for (const units of gens) for (const u of units) u.pus = new Set(u.m.map(p => parentU[p] && parentU[p].id).filter(Boolean));
-  const gapOf = (a, b) => [...a.pus].some(x => b.pus.has(x)) ? UGAP : UGAP2;
+  for (const units of gens) for (const u of units) {
+    u.pus = new Set(u.m.map(p => parentU[p] && parentU[p].id).filter(Boolean));
+    u.pps = new Set(); for (const p of u.m) { const q = parentU[p]; if (q) { if (q.a) u.pps.add(q.a); if (q.b) u.pps.add(q.b); } }
+  }
+  // Medios hermanos (mismo padre o madre en uniones distintas) también se tratan como fratría cercana.
+  const gapOf = (a, b) => [...a.pus].some(x => b.pus.has(x)) || [...a.pps].some(x => b.pps.has(x)) ? UGAP : UGAP2;
   for (const units of gens) { let x = 0; setUnits(units, units.map((u, i) => { const s = x; x += u.w + (units[i + 1] ? gapOf(u, units[i + 1]) : 0); return s; })); }
-  for (let it = 0; it < 8; it++) {
+  // Extensión horizontal de todos los descendientes de p (con sus cónyuges): cada familia reserva el espacio de su descendencia.
+  let memo = new Map();
+  const desc = p => {
+    if (memo.has(p)) return memo.get(p);
+    memo.set(p, null); let lo = Infinity, hi = -Infinity;
+    for (const un of us) if (un.a === p || un.b === p) for (const k of un.kids) {
+      const ku = unitOf[k]; lo = Math.min(lo, ku.s); hi = Math.max(hi, ku.s + ku.w);
+      const e = desc(k); if (e) { lo = Math.min(lo, e[0]); hi = Math.max(hi, e[1]); }
+    }
+    const r = lo <= hi ? [lo, hi] : null; memo.set(p, r); return r;
+  };
+  const downPass = () => {
     for (let g = 1; g <= G; g++) {
-      const units = gens[g], des = new Map();
+      const units = gens[g], des = new Map(), want = new Map(), ext = new Map(); memo = new Map();
       units.forEach((u, idx) => {
-        const xs = []; let ki = 0;
-        for (const p of u.m) { const pu = parentU[p]; if (pu) { const ps = [pu.a, pu.b].filter(Boolean); xs.push(mean(ps.map(q => cx[q]))); ki = Math.max(ki, pu.kids.indexOf(p)); } }
+        const xs = [], al = []; let ki = 0;
+        for (const [j, p] of u.m.entries()) { const pu = parentU[p]; if (pu) { const ps = [pu.a, pu.b].filter(Boolean), pc = mean(ps.map(q => cx[q])); xs.push(pc); al.push(pc - (u.offs[j] - u.w / 2)); ki = Math.max(ki, pu.kids.indexOf(p)); } }
         des.set(u, (xs.length ? mean(xs) : ucenter(u)) + ki * 0.01 + idx * 1e-6);
+        want.set(u, al.length ? mean(al) : ucenter(u));      // el hijo/a (no su cónyuge) queda justo bajo la línea de sus padres
+      });
+      // Cada unidad reserva también el sitio de sus descendientes (se supone que se mueven con ella).
+      units.forEach(u => {
+        let lo = Infinity, hi = -Infinity; const c0 = ucenter(u);
+        for (const p of u.m) { const e = desc(p); if (e) { lo = Math.min(lo, e[0]); hi = Math.max(hi, e[1]); } }
+        ext.set(u, [Math.max(u.w / 2, isFinite(lo) ? c0 - lo : 0), Math.max(u.w / 2, isFinite(hi) ? hi - c0 : 0)]);
       });
       units.sort((a, b) => des.get(a) - des.get(b));
-      place(units, u => des.get(u));
+      place(units, u => want.get(u), u => ext.get(u));
     }
+  };
+  const upPass = () => {
     for (let g = G - 1; g >= 0; g--) {
-      const units = gens[g];
-      place(units, u => {
-        const xs = [];
-        for (const p of u.m) for (const un of us) if (un.a === p || un.b === p) for (const k of un.kids) xs.push(cx[k]);
-        return xs.length ? mean(xs) : ucenter(u);
-      });
+      const units = gens[g]; memo = new Map();
+      const cen = new Map(), exts = new Map();
+      for (const u of units) {
+        const cs = []; let lo = Infinity, hi = -Infinity;
+        for (const [j, p] of u.m.entries()) {
+          for (const un of us) if ((un.a === p || un.b === p) && un.kids.length) {
+            // El punto de caída de la unión (entre los cónyuges) debe quedar sobre sus hijos, no el centro de toda la cadena.
+            const o = un.a === p ? un.b : un.a, jo = o ? u.m.indexOf(o) : -1;
+            if (jo >= 0 && jo < j) continue;                                  // cada unión se cuenta una sola vez
+            const drop = jo >= 0 ? (u.offs[j] + u.offs[jo]) / 2 : u.offs[j];
+            cs.push(mean(un.kids.map(k => cx[k])) - (drop - u.w / 2));
+          }
+          const e = desc(p); if (e) { lo = Math.min(lo, e[0]); hi = Math.max(hi, e[1]); }
+        }
+        const c = cs.length ? mean(cs) : ucenter(u);
+        cen.set(u, c); exts.set(u, [Math.max(u.w / 2, isFinite(lo) ? c - lo : 0), Math.max(u.w / 2, isFinite(hi) ? hi - c : 0)]);
+      }
+      place(units, u => cen.get(u), u => exts.get(u));
+    }
+  };
+  for (let it = 0; it < 8; it++) { downPass(); upPass(); }
+  downPass();      // al final los hijos quedan justo bajo la línea de sus padres (hijos únicos en línea recta)
+  // Compactación: cada familia (con toda su descendencia) se acerca a su vecina de la izquierda hasta que, en algún nivel, queden
+  // a la distancia mínima. Así los núcleos no quedan lejos entre sí sin motivo. No se mueve si eso rompería la línea recta de un hijo/a único.
+  const subtreeOf = root => {
+    const S = new Set([root]), st = [root];
+    while (st.length) { const u = st.pop(); for (const p of u.m) for (const un of us) if (un.a === p || un.b === p) for (const k of un.kids) { const ku = unitOf[k]; if (!S.has(ku)) { S.add(ku); st.push(ku); } } }
+    return S;
+  };
+  for (let pass = 0; pass < 2; pass++) for (let g = 1; g <= Math.min(1, G); g++) {   // solo la primera generación bajo los fundadores: más abajo separaría a los hijos de sus padres
+    for (const B of [...gens[g]].sort((a, b) => a.s - b.s)) {
+      const S = subtreeOf(B); let ok = true;
+      for (const u of S) for (const p of u.m) { const pu = parentU[p]; if (pu && pu.kids.length === 1 && !S.has(unitOf[pu.a || pu.b])) ok = false; }
+      if (!ok) continue;
+      const byLv = new Map();
+      for (const u of S) { const l = gen[u.m[0]]; if (!byLv.has(l)) byLv.set(l, []); byLv.get(l).push(u); }
+      let delta = Infinity;
+      for (const [l, list] of byLv) {
+        const first = list.reduce((a, b) => a.s < b.s ? a : b); let best = null;
+        for (const u of gens[l]) if (!S.has(u) && u.s + u.w <= first.s + 1e-6 && (!best || u.s + u.w > best.s + best.w)) best = u;
+        if (best) delta = Math.min(delta, first.s - (best.s + best.w) - gapOf(best, first));
+      }
+      if (isFinite(delta) && delta > 1) for (const u of S) setUnits([u], [u.s - delta]);
     }
   }
-  const pos = {}; ids.forEach(i => pos[i] = {x: cx[i], y: 0, g: gen[i]});
+  const pos = {}; ids.forEach(i => pos[i] = {x: cx[i] + (d.people[i].ox || 0), y: 0, g: gen[i]});
   // Barras de hermanos escalonadas; cada generación crece lo necesario para que quepan.
-  const bars = computeBars(d, pos); barLv = bars.lv;
+  const bars = !d.opts.ln || d.opts.ln.route === 'ortho' ? computeBars(d, pos) : {lv: {}, maxLv: {}}; barLv = bars.lv;
   const ys = [0];
   for (let g = 0; g < G; g++) ys.push(ys[g] + Math.max(GYMIN, 176 + LS * (bars.maxLv[g] || 0)));
-  ids.forEach(i => pos[i].y = ys[gen[i]]);
+  ids.forEach(i => pos[i].y = ys[gen[i]] + (d.people[i].oy || 0));
   return pos;
 }
 
@@ -578,7 +715,9 @@ function svgBody(pos, o) {
     if (!defs.has(key)) defs.set(key, {id: `${idp}-${p.pat}-${bg.slice(1)}`, pat: p.pat, bg, stroke: strokeFor(bg)});
     return `url(#${defs.get(key).id})`;
   };
-  const line = (x1, y1, x2, y2, extra = '') => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${INK}" stroke-width="2" stroke-linecap="round" ${extra}/>`;
+  const L = d.opts.ln || DEFLN, lw = L.w || 2, DASH = {solid: '', dash: 'stroke-dasharray="8 6"', dot: 'stroke-dasharray="0.1 6"'};
+  const line = (x1, y1, x2, y2, extra = '', w = lw) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${INK}" stroke-width="${w}" stroke-linecap="round" ${extra}/>`;
+  const kd = DASH[L.kid] || '', sd = DASH[L.sib] || '';
   const allPos = Object.values(pos);
 
   for (const u of Object.values(d.unions)) {
@@ -593,15 +732,19 @@ function svgBody(pos, o) {
         const gl = (l === pos[d.ego] ? 1.42 : 1.12), gr = (r === pos[d.ego] ? 1.42 : 1.12);
         const x1 = l.x + R * gl, x2 = r.x - R * gr, mx = (l.x + r.x) / 2;
         hit = `M${x1},${y0}L${x2},${y0}`;
-        if (u.status === 'casados') parts.push(line(x1, y0 - 3.5, x2, y0 - 3.5), line(x1, y0 + 3.5, x2, y0 + 3.5));
-        else parts.push(line(x1, y0, x2, y0, dash));
+        if (u.status === 'casados') {
+          if (L.mar === 'single') parts.push(line(x1, y0, x2, y0));
+          else if (L.mar === 'thick') parts.push(line(x1, y0, x2, y0, '', lw * 1.9));
+          else parts.push(line(x1, y0 - 3.5, x2, y0 - 3.5), line(x1, y0 + 3.5, x2, y0 + 3.5));
+        } else parts.push(line(x1, y0, x2, y0, dash));
         if (u.status === 'separados') parts.push(line(mx - 14, y0 + 11, mx - 6, y0 - 11), line(mx + 6, y0 + 11, mx + 14, y0 - 11));
         dropX = mx; dropY = y0;
       } else {
         const yb = y0 + R + 20, ya = y0 + R * 0.9, mx = (l.x + r.x) / 2;
         hit = `M${l.x},${ya}L${l.x},${yb}L${r.x},${yb}L${r.x},${ya}`;
-        const br = off => `<path d="M${l.x},${ya}L${l.x},${yb + off}L${r.x},${yb + off}L${r.x},${ya}" fill="none" stroke="${INK}" stroke-width="2" ${dash}/>`;
-        parts.push(br(0)); if (u.status === 'casados') parts.push(br(5));
+        const br = (off, w = lw) => `<path d="M${l.x},${ya}L${l.x},${yb + off}L${r.x},${yb + off}L${r.x},${ya}" fill="none" stroke="${INK}" stroke-width="${w}" ${dash}/>`;
+        if (u.status === 'casados' && L.mar === 'thick') parts.push(br(0, lw * 1.9));
+        else { parts.push(br(0)); if (u.status === 'casados' && L.mar !== 'single') parts.push(br(5)); }
         if (u.status === 'separados') parts.push(line(mx - 14, yb + 11, mx - 6, yb - 8), line(mx + 6, yb + 11, mx + 14, yb - 8));
         dropX = mx; dropY = yb;
       }
@@ -611,13 +754,22 @@ function svgBody(pos, o) {
     const kp = u.kids.filter(k => pos[k]);
     let trunk = '';
     if (kp.length) {
-      const barY = y0 + BAR + (barLv[u.id] || 0) * LS, xs = kp.map(k => pos[k].x);
+      const barY = y0 + BAR + (barLv[u.id] || 0) * LS, xs = kp.map(k => pos[k].x), ky = k => pos[k].y - R * (d.ego === k ? 1.45 : 1.18);
       if (kp.length === 1 && Math.abs(xs[0] - dropX) <= 12) dropX = xs[0];   // hijo/a único bajo sus padres: línea recta, sin «escalón»
-      parts.push(line(dropX, dropY, dropX, barY));
-      const lo = Math.min(dropX, ...xs), hi = Math.max(dropX, ...xs);
-      if (hi > lo) parts.push(line(lo, barY, hi, barY));
-      for (const k of kp) parts.push(line(pos[k].x, barY, pos[k].x, pos[k].y - R * (d.ego === k ? 1.45 : 1.18)));
-      trunk = `M${dropX},${dropY}L${dropX},${barY}`;
+      if (L.route === 'fan' || L.route === 'curve') {
+        for (const k of kp) {
+          const x2 = pos[k].x, y2 = ky(k), my = (dropY + y2) / 2;
+          const dd = L.route === 'fan' || Math.abs(x2 - dropX) < 1 ? `M${dropX},${dropY}L${x2},${y2}` : `M${dropX},${dropY}C${dropX},${my} ${x2},${my} ${x2},${y2}`;
+          parts.push(`<path d="${dd}" fill="none" stroke="${INK}" stroke-width="${lw}" stroke-linecap="round" ${kd}/>`);
+          trunk += dd;
+        }
+      } else {
+        parts.push(line(dropX, dropY, dropX, barY, kd));
+        const lo = Math.min(dropX, ...xs), hi = Math.max(dropX, ...xs);
+        if (hi > lo) parts.push(line(lo, barY, hi, barY, sd));
+        for (const k of kp) parts.push(line(pos[k].x, barY, pos[k].x, ky(k), kd));
+        trunk = `M${dropX},${dropY}L${dropX},${barY}`;
+      }
     }
     const hp = (hit + ' ' + trunk).trim();
     if (o.interactive && hp) edges.push(`<path d="${hp}" fill="none" stroke="transparent" stroke-width="18" data-uid="${esc(u.id)}" style="cursor:pointer"/>`);
@@ -628,12 +780,12 @@ function svgBody(pos, o) {
   const halo = `paint-order="stroke" stroke="${paper}" stroke-width="4" stroke-linejoin="round"`;
   for (const [id, p] of Object.entries(d.people)) {
     const q = pos[id]; if (!q) continue;
-    const sel = o.sel && o.sel.t === 'p' && o.sel.id === id, isEgo = d.ego === id;
+    const sel = (o.sel && o.sel.t === 'p' && o.sel.id === id) || (o.msel && o.msel.has(id)), isEgo = d.ego === id;
     let g = `<g data-pid="${esc(id)}" ${o.interactive ? 'style="cursor:pointer"' : ''}>`;
     if (sel) g += `${shape(p.sex, q.x, q.y, 1.55, d.opts.male)} fill="${ACC}" fill-opacity=".2"/>`;
     g += `${shape(p.sex, q.x, q.y, 1, d.opts.male)} fill="${fillFor(p)}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
     if (isEgo) g += `${shape(p.sex, q.x, q.y, 1.32, d.opts.male)} fill="none" stroke="${EGO}" stroke-width="2.5" stroke-linejoin="round"/>`;
-    if (p.dead) g += line(q.x - R * 1.25, q.y + R * 1.25, q.x + R * 1.25, q.y - R * 1.25, 'stroke-width="2.6"');
+    if (p.dead) g += line(q.x - R * 1.25, q.y + R * 1.25, q.x + R * 1.25, q.y - R * 1.25, '', 2.6);
     const L = [];
     wrap(p.name || '(sin nombre)', 15).forEach(t => L.push([t, 'font-size="13" font-weight="600" fill="' + INK + '"']));
     if (d.opts.dates && p.born) L.push([p.born, 'font-size="11" fill="#5b6672"']);
@@ -650,7 +802,7 @@ function svgBody(pos, o) {
 /* =====================================================================
    ESTADO, HISTORIAL Y PERSISTENCIA
    ===================================================================== */
-let doc = blankDoc(), sel = null, tab = 'person';
+let doc = blankDoc(), sel = null, tab = 'person', editMode = false, msel = new Set();
 let hist = [], fut = [], lastKey = null, lastT = 0;
 let kin = {}, layoutPos = {}, shownPos = {}, anim = null, barLv = {};
 const view = {x: 40, y: 40, k: 1};
@@ -757,6 +909,7 @@ function setField(id, f, v, o = {}) {
    ===================================================================== */
 const optHtml = (arr, cur) => arr.map(([v, t]) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(t)}</option>`).join('');
 
+const colorName = h => !h ? 'Sin color' : ((PALETTE.find(([v]) => v === h) || [])[1] || h.toUpperCase());
 function personPanel(id) {
   const p = doc.people[id], k = kin[id], mine = unionsOf(id), pu = parentUnion(id);
   const others = Object.keys(doc.people).filter(i => i !== id).map(i => [i, personName(i)]);
@@ -777,18 +930,22 @@ function personPanel(id) {
   <label for="f-born">Fechas${doc.opts.sortKids !== false ? ' <span style="font-weight:400">(el primer año ordena a los hermanos)</span>' : ''}</label>
   <input type="text" id="f-born" data-f="born" value="${esc(p.born)}" placeholder="1950 – 2015" autocomplete="off">
   <label>Color de relleno</label>
-  <div class="swatches" role="group" aria-label="Paleta de colores">
-    <button class="sw none" data-act="color" data-v="" title="Sin color" aria-label="Sin color" aria-pressed="${!p.color}"></button>
-    ${PALETTE.map(([h, n]) => `<button class="sw" data-act="color" data-v="${h}" style="background:${h}" title="${n}" aria-label="${n}" aria-pressed="${p.color === h}"></button>`).join('')}
-  </div>
-  <div class="hexrow">
-    <input type="color" id="f-pick" data-f="pick" value="${p.color || '#ffffff'}" aria-label="Elegir cualquier color">
-    <input type="text" id="f-hex" data-f="hex" value="${esc(p.color)}" placeholder="Código hexadecimal, p. ej. #c2410c" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Código hexadecimal del color">
-  </div>
+  <details class="dd"><summary><span class="cur ${p.color ? '' : 'none'}" style="${p.color ? 'background:' + p.color : ''}"></span>${esc(colorName(p.color))}</summary>
+    <div class="ddbody">
+      <div class="swatches" role="group" aria-label="Paleta de colores">
+        <button class="sw none" data-act="color" data-v="" title="Sin color" aria-label="Sin color" aria-pressed="${!p.color}"></button>
+        ${PALETTE.map(([h, n]) => `<button class="sw" data-act="color" data-v="${h}" style="background:${h}" title="${n}" aria-label="${n}" aria-pressed="${p.color === h}"></button>`).join('')}
+      </div>
+      <div class="hexrow">
+        <input type="color" id="f-pick" data-f="pick" value="${p.color || '#ffffff'}" aria-label="Elegir cualquier color">
+        <input type="text" id="f-hex" data-f="hex" value="${esc(p.color)}" placeholder="Hexadecimal, p. ej. #c2410c" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Código hexadecimal del color">
+      </div>
+    </div></details>
   <label>Achurado</label>
-  <div class="pats" role="group" aria-label="Achurado">
-    ${PATS.map(([v, n]) => `<button data-act="pat" data-v="${v}" title="${n}" aria-label="${n}" aria-pressed="${p.pat === v}"><span class="pv ${v}" style="background-color:${p.color || '#fff'}"></span></button>`).join('')}
-  </div>
+  <details class="dd"><summary><span class="pv ${p.pat}" style="background-color:${p.color || '#fff'}"></span>${esc((PATS.find(([v]) => v === p.pat) || PATS[0])[1])}</summary>
+    <div class="ddbody"><div class="pats" role="group" aria-label="Achurado">
+      ${PATS.map(([v, n]) => `<button data-act="pat" data-v="${v}" title="${n}" aria-label="${n}" aria-pressed="${p.pat === v}"><span class="pv ${v}" style="background-color:${p.color || '#fff'}"></span></button>`).join('')}
+    </div></div></details>
   <label style="display:flex;align-items:center;gap:6px;margin-top:10px"><input type="checkbox" data-f="dead" ${p.dead ? 'checked' : ''}> Fallecido/a</label>
   <label for="f-term">Término émico <span style="font-weight:400">(cómo lo/la llama Ego)</span></label><input type="text" id="f-term" data-f="term" value="${esc(p.term)}" autocomplete="off">
   <label for="f-note">Nota</label><textarea id="f-note" data-f="note">${esc(p.note)}</textarea>
@@ -878,6 +1035,7 @@ panel.addEventListener('input', e => {
     if (t.dataset.f === 'hex' && pk) pk.value = h;
     $$('.sw[data-act=color]', panel).forEach(b => b.setAttribute('aria-pressed', b.dataset.v === h));
     $$('.pv', panel).forEach(s => s.style.backgroundColor = h);
+    const cur = $('.dd .cur', panel); if (cur) { cur.classList.remove('none'); cur.style.background = h; }
     return;
   }
   if (t.dataset.f && sel && sel.t === 'p') { if (t.type === 'checkbox') setField(sel.id, t.dataset.f, t.checked); else if (t.tagName !== 'SELECT') setField(sel.id, t.dataset.f, t.value); }
@@ -914,13 +1072,13 @@ panel.addEventListener('click', e => {
 });
 $$('.tabs button').forEach(b => b.addEventListener('click', () => { tab = b.dataset.tab; renderPanel(); }));
 
-function select(s) { sel = s; if (s && s.t === 'p' && tab !== 'person') tab = 'person'; refresh({animate: false}); if (s && s.t === 'p') reveal(s.id); }
+function select(s) { sel = s; if (editMode) msel = s && s.t === 'p' ? new Set([s.id]) : new Set(); if (s && s.t === 'p' && tab !== 'person') tab = 'person'; refresh({animate: false}); if (s && s.t === 'p') reveal(s.id); }
 
 /* =====================================================================
    RENDER, ANIMACIÓN Y VISTA
    ===================================================================== */
 function draw() {
-  world.innerHTML = svgBody(shownPos, {doc, kin, sel, paper: PAPER, interactive: true});
+  world.innerHTML = svgBody(shownPos, {doc, kin, sel, msel: editMode ? msel : null, paper: PAPER, interactive: true});
 }
 function renderPos(target, animate) {
   if (anim) cancelAnimationFrame(anim);
@@ -954,6 +1112,7 @@ function reveal(id) {
 function syncOpts() {
   $('#oNotation').checked = doc.opts.notation; $('#oTerms').checked = doc.opts.terms; $('#oDates').checked = doc.opts.dates; $('#oMale').value = doc.opts.male;
   $('#oSort').checked = doc.opts.sortKids !== false;
+  const L = doc.opts.ln || DEFLN; $('#lnMar').value = L.mar; $('#lnKid').value = L.kid; $('#lnSib').value = L.sib; $('#lnRoute').value = L.route; $('#lnW').value = String(L.w);
   if (document.activeElement !== $('#title')) $('#title').value = doc.title;
   $('#btnUndo').disabled = !hist.length; $('#btnRedo').disabled = !fut.length;
 }
@@ -965,38 +1124,117 @@ function refresh(o = {}) {
   syncOpts();
   if (!o.keepPanel) renderPanel();
   if (o.reveal) reveal(o.reveal);
+  if (editMode) { msel = new Set([...msel].filter(i => doc.people[i])); updateEditBar(); }
 }
 
 /* ---- zoom, desplazamiento y selección con el puntero ---- */
-const ptrs = new Map(); let drag = null;
+const ptrs = new Map(); let drag = null, spaceDown = false;
 const toScreen = e => { const r = svg.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
 function zoomAt(f, sx, sy) { const k = Math.min(4, Math.max(0.1, view.k * f)), re = k / view.k; view.x = sx - (sx - view.x) * re; view.y = sy - (sy - view.y) * re; view.k = k; applyView(); }
 svg.addEventListener('wheel', e => { e.preventDefault(); const [sx, sy] = toScreen(e); zoomAt(Math.exp(-e.deltaY * 0.0015), sx, sy); }, {passive: false});
+const marq = $('#marq');
 svg.addEventListener('pointerdown', e => {
   svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x: e.clientX, y: e.clientY});
-  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; drag = {type: 'pinch', d: Math.hypot(a.x - b.x, a.y - b.y)}; return; }
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; drag = {type: 'pinch', d: Math.hypot(a.x - b.x, a.y - b.y)}; marq.style.display = 'none'; return; }
   const hit = e.target.closest && e.target.closest('[data-pid],[data-uid]');
-  drag = {type: 'pan', x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, hit};
+  const base = {x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, hit};
+  if (editMode && e.button === 0 && !spaceDown) {
+    const mod = e.shiftKey || e.ctrlKey || e.metaKey;
+    if (hit && hit.dataset.pid) {
+      const id = hit.dataset.pid;
+      if (mod) { msel.has(id) ? msel.delete(id) : msel.add(id); sel = msel.has(id) ? {t: 'p', id} : null; refresh({animate: false}); drag = {type: 'none'}; return; }
+      if (!msel.has(id)) { msel = new Set([id]); }
+      drag = {...base, type: 'move', ids: [...msel], start: Object.fromEntries([...msel].map(i => [i, {ox: doc.people[i].ox || 0, oy: doc.people[i].oy || 0}])), pushed: false};
+      return;
+    }
+    if (!hit) { drag = {...base, type: 'marquee', add: mod, prev: new Set(msel)}; return; }
+  }
+  drag = {...base, type: 'pan'};
 });
 svg.addEventListener('pointermove', e => {
   if (!ptrs.has(e.pointerId)) return;
   ptrs.set(e.pointerId, {x: e.clientX, y: e.clientY});
   if (!drag) return;
   if (drag.type === 'pinch') { if (ptrs.size < 2) return; const [a, b] = [...ptrs.values()], dd = Math.hypot(a.x - b.x, a.y - b.y), r = svg.getBoundingClientRect(); zoomAt(dd / drag.d, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); drag.d = dd; return; }
-  if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 5) { drag.moved = true; svg.classList.add('panning'); }
-  if (drag.moved) { view.x += e.clientX - drag.x; view.y += e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY; applyView(); }
+  if (drag.type === 'none') return;
+  if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 5) { drag.moved = true; if (drag.type === 'pan') svg.classList.add('panning'); }
+  if (!drag.moved) return;
+  if (drag.type === 'pan') { view.x += e.clientX - drag.x; view.y += e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY; applyView(); }
+  else if (drag.type === 'move') {
+    if (!drag.pushed) { hist.push(JSON.stringify(doc)); if (hist.length > 100) hist.shift(); fut = []; lastKey = null; drag.pushed = true; }
+    const dx = (e.clientX - drag.sx) / view.k, dy = (e.clientY - drag.sy) / view.k;
+    for (const i of drag.ids) { const p = doc.people[i], st = drag.start[i]; p.ox = Math.round((st.ox + dx) * 10) / 10; p.oy = Math.round((st.oy + dy) * 10) / 10; }
+    layoutPos = computeLayout(doc); renderPos(layoutPos, false);
+  } else if (drag.type === 'marquee') {
+    const r = $('#stage').getBoundingClientRect(), x0 = Math.min(drag.sx, e.clientX) - r.left, y0 = Math.min(drag.sy, e.clientY) - r.top;
+    Object.assign(marq.style, {display: 'block', left: x0 + 'px', top: y0 + 'px', width: Math.abs(e.clientX - drag.sx) + 'px', height: Math.abs(e.clientY - drag.sy) + 'px'});
+    const sr = svg.getBoundingClientRect(), X0 = Math.min(drag.sx, e.clientX) - sr.left, X1 = Math.max(drag.sx, e.clientX) - sr.left, Y0 = Math.min(drag.sy, e.clientY) - sr.top, Y1 = Math.max(drag.sy, e.clientY) - sr.top;
+    const inside = Object.entries(shownPos).filter(([, q]) => { const px = q.x * view.k + view.x, py = q.y * view.k + view.y; return px >= X0 && px <= X1 && py >= Y0 && py <= Y1; }).map(([i]) => i);
+    msel = new Set([...(drag.add ? drag.prev : []), ...inside]); draw(); updateEditBar();
+  }
 });
 function endPtr(e) {
   ptrs.delete(e.pointerId);
-  if (drag && drag.type === 'pan' && !drag.moved && e.type === 'pointerup') {
-    const h = drag.hit;
-    if (h && h.dataset.pid) select({t: 'p', id: h.dataset.pid});
-    else if (h && h.dataset.uid) select({t: 'u', id: h.dataset.uid});
-    else if (sel) { sel = null; refresh({animate: false}); }
+  if (drag && e.type === 'pointerup') {
+    if (drag.type === 'pan' && !drag.moved) {
+      const h = drag.hit;
+      if (h && h.dataset.pid) select({t: 'p', id: h.dataset.pid});
+      else if (h && h.dataset.uid) select({t: 'u', id: h.dataset.uid});
+      else if (sel) { sel = null; refresh({animate: false}); }
+    } else if (drag.type === 'move') {
+      if (drag.moved) { save(); syncOpts(); }
+      else select({t: 'p', id: drag.hit.dataset.pid});
+    } else if (drag.type === 'marquee') {
+      marq.style.display = 'none';
+      if (!drag.moved) { if (!drag.add) { msel = new Set(); sel = null; refresh({animate: false}); } }
+      else { const first = [...msel][0]; sel = msel.size === 1 && first ? {t: 'p', id: first} : null; refresh({animate: false}); }
+    }
   }
+  if (drag && drag.type === 'marquee') marq.style.display = 'none';
   if (!ptrs.size || (drag && drag.type === 'pinch' && ptrs.size < 2)) { drag = null; svg.classList.remove('panning'); }
 }
 svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr);
+
+/* ---- modo «Editar»: mover, alinear y distribuir ---- */
+function updateEditBar() {
+  const n = [...msel].filter(i => doc.people[i]).length;
+  $('#editCnt').textContent = n ? n + (n === 1 ? ' persona seleccionada' : ' personas seleccionadas') : 'Clic, Mayús+clic o arrastra un recuadro para seleccionar';
+  $$('#editbar [data-op]').forEach(b => { const op = b.dataset.op; b.disabled = (['left', 'cx', 'right', 'top', 'cy', 'bottom', 'l', 'u', 'd', 'r', 'reset'].includes(op) && !n) || ((op === 'dh' || op === 'dv') && n < 3); });
+}
+function setEdit(on) {
+  editMode = on; $('#editbar').hidden = !on; $('#btnEdit').setAttribute('aria-pressed', on);
+  msel = on && sel && sel.t === 'p' ? new Set([sel.id]) : new Set();
+  $('.hint').innerHTML = on
+    ? 'Modo edición: arrastra personas para moverlas · arrastra el fondo para seleccionar varias (Mayús suma) · <kbd>Espacio</kbd>+arrastrar mueve la vista · flechas = mover (Mayús ×4, Alt ×0.1) · «Auto-organizar todo» deshace los ajustes'
+    : 'Haz clic en una persona o en una línea de unión para editarla · Arrastra el fondo para moverte · Rueda o pellizco = zoom · <kbd>Supr</kbd> borra la selección';
+  updateEditBar(); draw();
+}
+function editOp(op) {
+  const ids = [...msel].filter(i => doc.people[i] && layoutPos[i]);
+  if (op === 'all-sel') { msel = new Set(Object.keys(doc.people)); updateEditBar(); draw(); return; }
+  if (op === 'reset-all') { if (!Object.values(doc.people).some(p => p.ox || p.oy)) return toast('No hay ajustes manuales'); commit(d => { for (const p of Object.values(d.people)) { delete p.ox; delete p.oy; } }, {keepPanel: true}); return toast('Diagrama reorganizado automáticamente'); }
+  if (!ids.length) return;
+  const xs = ids.map(i => layoutPos[i].x), ys = ids.map(i => layoutPos[i].y);
+  const mn = a => Math.min(...a), mx = a => Math.max(...a);
+  const shift = {};                                                       // id -> [dx, dy]
+  const nudge = {l: [-10, 0], r: [10, 0], u: [0, -10], d: [0, 10]};
+  ids.forEach((i, k) => {
+    const x = xs[k], y = ys[k];
+    if (op === 'left') shift[i] = [mn(xs) - x, 0]; else if (op === 'right') shift[i] = [mx(xs) - x, 0]; else if (op === 'cx') shift[i] = [(mn(xs) + mx(xs)) / 2 - x, 0];
+    else if (op === 'top') shift[i] = [0, mn(ys) - y]; else if (op === 'bottom') shift[i] = [0, mx(ys) - y]; else if (op === 'cy') shift[i] = [0, (mn(ys) + mx(ys)) / 2 - y];
+    else if (nudge[op]) shift[i] = nudge[op];
+  });
+  if ((op === 'dh' || op === 'dv') && ids.length >= 3) {
+    const h = op === 'dh', key = h ? xs : ys, order = ids.map((i, k) => [i, key[k]]).sort((a, b) => a[1] - b[1]), lo = order[0][1], step = (order[order.length - 1][1] - lo) / (order.length - 1);
+    order.forEach(([i, v], k) => { const t = lo + k * step; shift[i] = h ? [t - v, 0] : [0, t - v]; });
+  }
+  if (op === 'reset') ids.forEach(i => shift[i] = null);
+  commit(d => { for (const i of ids) { const p = d.people[i], sh = shift[i];
+    if (sh === null) { delete p.ox; delete p.oy; } else if (sh) { const nx = Math.round(((p.ox || 0) + sh[0]) * 10) / 10, ny = Math.round(((p.oy || 0) + sh[1]) * 10) / 10; nx ? p.ox = nx : delete p.ox; ny ? p.oy = ny : delete p.oy; } } },
+    {keepPanel: true, key: nudge[op] ? 'nudge' : undefined});
+}
+$$('#editbar [data-op]').forEach(b => b.addEventListener('click', () => editOp(b.dataset.op)));
+$('#btnEdit').addEventListener('click', () => setEdit(!editMode));
 
 /* =====================================================================
    EXPORTACIÓN, IMPORTACIÓN Y EJEMPLOS
@@ -1091,6 +1329,10 @@ function openFile(file) {
 $('#title').addEventListener('input', e => commit(d => { d.title = e.target.value; }, {key: 'title', keepPanel: true, animate: false}));
 for (const [id, k] of [['oNotation', 'notation'], ['oTerms', 'terms'], ['oDates', 'dates']]) $('#' + id).addEventListener('change', e => commit(d => { d.opts[k] = e.target.checked; }, {animate: false, keepPanel: true}));
 $('#oSort').addEventListener('change', e => commit(d => { d.opts.sortKids = e.target.checked; }));
+for (const [id, k] of [['lnMar', 'mar'], ['lnKid', 'kid'], ['lnSib', 'sib'], ['lnRoute', 'route'], ['lnW', 'w']])
+  $('#' + id).addEventListener('change', e => commit(d => { d.opts.ln = {...DEFLN, ...d.opts.ln, [k]: k === 'w' ? +e.target.value : e.target.value}; }, {keepPanel: true, animate: k === 'route'}));
+$('#lnReset').addEventListener('click', () => commit(d => { d.opts.ln = {...DEFLN}; }, {keepPanel: true}));
+document.addEventListener('click', e => { for (const d of $$('details.pop[open]')) if (!d.contains(e.target)) d.open = false; });
 $('#oMale').addEventListener('change', e => commit(d => { d.opts.male = e.target.value; }, {animate: false, keepPanel: true}));
 $('#btnUndo').onclick = undo; $('#btnRedo').onclick = redo;
 $('#btnExamples').onclick = () => $('#dlgExamples').showModal();
@@ -1116,8 +1358,18 @@ addEventListener('keydown', e => {
     if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); } else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
   }
   if (!typing && (e.key === 'Delete' || e.key === 'Backspace') && sel && !document.querySelector('dialog[open]')) { e.preventDefault(); sel.t === 'p' ? deletePerson(sel.id) : deleteUnion(sel.id); }
-  if (e.key === 'Escape' && sel && !typing) { sel = null; refresh({animate: false}); }
+  if (e.key === 'Escape' && !typing && (sel || msel.size)) { sel = null; msel = new Set(); refresh({animate: false}); }
+  if (editMode && !typing && !document.querySelector('dialog[open]')) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') { e.preventDefault(); editOp('all-sel'); }
+    const arrows = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]};
+    if (arrows[e.key] && msel.size) {
+      e.preventDefault(); const st = e.shiftKey ? 40 : e.altKey ? 1 : 10, [ax, ay] = arrows[e.key];
+      commit(d => { for (const i of msel) { const p = d.people[i]; if (!p) continue; const nx = Math.round(((p.ox || 0) + ax * st) * 10) / 10, ny = Math.round(((p.oy || 0) + ay * st) * 10) / 10; nx ? p.ox = nx : delete p.ox; ny ? p.oy = ny : delete p.oy; } }, {keepPanel: true, animate: false, key: 'nudge'});
+    }
+  }
+  if (e.code === 'Space' && !typing && editMode) { spaceDown = true; e.preventDefault(); }
 });
+addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 
 const saved = loadSaved();
 doc = saved && Object.keys(saved.people).length ? saved : blankDoc();
